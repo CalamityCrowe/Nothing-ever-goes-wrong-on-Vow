@@ -51,8 +51,6 @@ private:
 
 	TObjectPtr<USceneComponent> ItemHolderComponent;
 
-
-
 	UFUNCTION()
 	void MovePlayer(const FInputActionValue& Value); 
 
