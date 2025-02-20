@@ -20,11 +20,54 @@ ALethalPlayer::ALethalPlayer() :ALethalCharacters()
 	ItemHolderComponent->SetupAttachment(GetRootComponent());
 }
 
-void ALethalPlayer::PickupItem(TObjectPtr<ALethalItem> ItemToPickup)
+void ALethalPlayer::AttemptPickupItem()
 {
-	ItemToPickup->ToggleCollision(false);
+	if (!HeldItem.IsNull())
+	{
+		return;
+	}
 
-	ItemToPickup->AttachToActor(this, FAttachmentTransformRules::KeepRelativeTransform, FName("ItemHold_Socket"));
+	FVector CameraLocation = CameraComponent->GetComponentLocation();
+	FRotator CameraRotation = CameraComponent->GetComponentRotation();
+
+	FVector ForwardVector = CameraRotation.Vector();
+
+	// 1000 for a long ray, checking distance later
+	FVector TraceEnd = CameraLocation + (ForwardVector * 1000.0f);
+
+	FHitResult Hit;
+	FCollisionQueryParams QueryParams;
+
+	QueryParams.AddIgnoredActor(this);
+
+	bool bHit = GetWorld()->LineTraceSingleByChannel(Hit, CameraLocation, TraceEnd, ECC_Visibility, QueryParams);
+
+	FVector CharacterLocation = FVector(GetActorLocation().X, GetActorLocation().Y, GetActorLocation().Z - CharacterHeight);
+
+	if (bHit)
+	{
+		TObjectPtr<ALethalItem> ItemHit = Cast<ALethalItem>(Hit.GetActor());
+
+		if (ItemHit && HeldItem.IsNull() && FVector::Dist(CharacterLocation, ItemHit->GetActorLocation()) <= ItemGrabRange)
+		{
+			ItemHit->ToggleCollision(false);
+
+			ItemHit->AttachToActor(this, FAttachmentTransformRules::KeepRelativeTransform, ItemHoldSocketName);
+
+			if (ItemHit->GetAttachParentSocketName() == ItemHoldSocketName)
+			{
+				HeldItem = ItemHit;
+			}
+		}
+	}
+
+#if UE_EDITOR
+	if (bDebug)
+	{
+		DrawDebugLine(GetWorld(), CameraLocation, TraceEnd, FColor::Red, false, 1.0f, 0, 5.0f);
+		DrawDebugSphere(GetWorld(), CharacterLocation, ItemGrabRange, 32, FColor(255, 0, 0, 128), false, 1.0f);
+	}
+#endif
 }
 
 void ALethalPlayer::DropItem(TObjectPtr<ALethalItem> ItemToDrop)
@@ -32,6 +75,18 @@ void ALethalPlayer::DropItem(TObjectPtr<ALethalItem> ItemToDrop)
 	ItemToDrop->ToggleCollision(true);
 
 	ItemToDrop->DetachFromActor(FDetachmentTransformRules::KeepRelativeTransform);
+
+	if (ItemToDrop->GetAttachParentSocketName() != ItemHoldSocketName)
+	{
+		HeldItem = nullptr;
+	}
+}
+
+void ALethalPlayer::ToggleDebug()
+{
+#if UE_EDITOR
+	bDebug = !bDebug;
+#endif
 }
 
 void ALethalPlayer::BeginPlay()
@@ -51,7 +106,10 @@ void ALethalPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 			{
 				if (UEnhancedInputLocalPlayerSubsystem* InputSystem = LocalPlayer->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>())
 				{
-					InputSystem->AddMappingContext(InputData->Contexts[0], 0); 
+					for (TObjectPtr<UInputMappingContext> Context : InputData->Contexts)
+					{
+						InputSystem->AddMappingContext(Context, 0);
+					}
 				}
 			}
 		}
@@ -62,6 +120,9 @@ void ALethalPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 		PEI->BindAction(InputData->MovementActions[0], ETriggerEvent::Triggered, this, &ALethalPlayer::MovePlayer); 
 		PEI->BindAction(InputData->MovementActions[1], ETriggerEvent::Triggered, this, &ALethalPlayer::Look);
 		PEI->BindAction(InputData->MovementActions[2], ETriggerEvent::Triggered, this, &ACharacter::Jump);
+
+		PEI->BindAction(InputData->InteractActions[0], ETriggerEvent::Triggered, this, &ALethalPlayer::AttemptPickupItem);
+		PEI->BindAction(InputData->InteractActions[1], ETriggerEvent::Triggered, this, &ALethalPlayer::ToggleDebug);
 	}
 }
 
