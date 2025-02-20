@@ -19,8 +19,11 @@ public:
 
 	ALethalPlayer();
 
-	void PickupItem(TObjectPtr<ALethalItem> ItemToPickup);
-	void DropItem(TObjectPtr<ALethalItem> ItemToDrop);
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	FName ItemHoldSocketName = "ItemHold_Socket";
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	float ItemGrabRange = 1000.0f;
 
 protected:
 	virtual void BeginPlay() override;
@@ -42,5 +45,16 @@ private:
 	void MovePlayer(const FInputActionValue& Value); 
 
 	UFUNCTION()
-	void Look(const FInputActionValue& Value); 
+	void Look(const FInputActionValue& Value);
+
+	void AttemptPickupItem();
+
+	void DropItem(TObjectPtr<ALethalItem> ItemToDrop);
+
+	TObjectPtr<ALethalItem> HeldItem;
+
+	void ToggleDebug();
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = true))
+	bool bDebug = false;
 };

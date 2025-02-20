@@ -24,4 +24,7 @@ public:
 	TArray<TObjectPtr<UInputAction>> MovementActions;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Inputs|Movement")
 	TArray<TObjectPtr<UInputAction>> AttackActions;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Inputs|Movement")
+	TArray<TObjectPtr<UInputAction>> InteractActions;
+
 };
