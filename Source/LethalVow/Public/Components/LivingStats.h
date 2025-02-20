@@ -26,12 +26,14 @@ public:
 
 	void ResetHealth() { Health = MaxHealth; }
 	bool IsAlive() { return bIsAlive; }
+	float GetHealth() { return Health; }
+	float GetMaxHealth() { return MaxHealth; }
+
 private:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly,Category = "Stats|Health", meta = (AllowPrivateAccess = true))
 	float Health;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Stats|Health", meta = (AllowPrivateAccess = true))
 	float MaxHealth;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Stats|Health", meta = (AllowPrivateAccess = true))
-	bool bIsAlive;
-		
+	bool bIsAlive;		
 };

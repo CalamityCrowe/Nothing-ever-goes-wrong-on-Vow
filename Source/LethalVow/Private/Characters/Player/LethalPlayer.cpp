@@ -3,6 +3,7 @@
 
 #include "Characters/Player/LethalPlayer.h"
 #include "Camera/CameraComponent.h"
+#include "Components/LivingStats.h"
 
 #include "DataAssets/InputData.h"
 #include "EnhancedInputComponent.h"
@@ -62,6 +63,12 @@ void ALethalPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 		PEI->BindAction(InputData->MovementActions[1], ETriggerEvent::Triggered, this, &ALethalPlayer::Look);
 		PEI->BindAction(InputData->MovementActions[2], ETriggerEvent::Triggered, this, &ACharacter::Jump);
 	}
+}
+
+void ALethalPlayer::DamageHealth(float DamageAmount)
+{
+	StatsComponent->DamageHealth(DamageAmount);
+	OnPlayerHealthUpdated.Broadcast(StatsComponent->GetHealth()/StatsComponent->GetMaxHealth());
 }
 
 void ALethalPlayer::MovePlayer(const FInputActionValue& Value)

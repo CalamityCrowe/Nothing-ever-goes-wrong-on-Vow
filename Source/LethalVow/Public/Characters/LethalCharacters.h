@@ -30,7 +30,10 @@ public:
 	
 	UFUNCTION()
 	virtual bool IsAlive() const;
-private:
+
+
+
+protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Stats", meta = (AllowPrivateAccess = true))
 	TObjectPtr<ULivingStats> StatsComponent;
 	
