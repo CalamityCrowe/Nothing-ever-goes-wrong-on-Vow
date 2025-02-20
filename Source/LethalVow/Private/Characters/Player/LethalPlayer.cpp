@@ -31,7 +31,8 @@ void ALethalPlayer::AttemptPickupItem()
 
 	FVector ForwardVector = CameraRotation.Vector();
 
-	FVector TraceEnd = CameraLocation + (ForwardVector * ItemGrabRange);
+	// 1000 for a long ray, checking distance later
+	FVector TraceEnd = CameraLocation + (ForwardVector * 1000.0f);
 
 	FHitResult Hit;
 	FCollisionQueryParams QueryParams;
@@ -40,11 +41,13 @@ void ALethalPlayer::AttemptPickupItem()
 
 	bool bHit = GetWorld()->LineTraceSingleByChannel(Hit, CameraLocation, TraceEnd, ECC_Visibility, QueryParams);
 
+	FVector CharacterLocation = FVector(GetActorLocation().X, GetActorLocation().Y, GetActorLocation().Z - CharacterHeight);
+
 	if (bHit)
 	{
 		TObjectPtr<ALethalItem> ItemHit = Cast<ALethalItem>(Hit.GetActor());
 
-		if (ItemHit && HeldItem.IsNull())
+		if (ItemHit && HeldItem.IsNull() && FVector::Dist(CharacterLocation, ItemHit->GetActorLocation()) <= ItemGrabRange)
 		{
 			ItemHit->ToggleCollision(false);
 
@@ -61,6 +64,7 @@ void ALethalPlayer::AttemptPickupItem()
 	if (bDebug)
 	{
 		DrawDebugLine(GetWorld(), CameraLocation, TraceEnd, FColor::Red, false, 1.0f, 0, 5.0f);
+		DrawDebugSphere(GetWorld(), CharacterLocation, ItemGrabRange, 32, FColor(255, 0, 0, 128), false, 1.0f);
 	}
 #endif
 }

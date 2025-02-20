@@ -23,7 +23,10 @@ public:
 	FName ItemHoldSocketName = "ItemHold_Socket";
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	float ItemGrabRange = 1000.0f;
+	float ItemGrabRange = 100.0f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	float CharacterHeight;
 
 protected:
 	virtual void BeginPlay() override;
@@ -38,7 +41,6 @@ private:
 	UPROPERTY(EditDefaultsOnly,BLueprintReadOnly, Category = "Inputs",meta = (AllowPrivateAccess = true))
 	TObjectPtr<UInputData> InputData;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = true))
 	TObjectPtr<USceneComponent> ItemHolderComponent;
 
 	UFUNCTION()
