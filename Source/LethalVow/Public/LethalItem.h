@@ -35,13 +35,14 @@ public:
 
 	virtual void BeginPlay() override;
 
+	void ToggleCollision(bool Collision);
 private:
 	FName ItemName;
 
 	FName ItemDescription;
 
-	UStaticMeshComponent* StaticMeshComponent;
+	TObjectPtr<UStaticMeshComponent> StaticMeshComponent;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = true))
-	UDataTable* ItemsDataTable;
+	TObjectPtr<UDataTable> ItemsDataTable;
 };

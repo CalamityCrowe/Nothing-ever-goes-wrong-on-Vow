@@ -7,8 +7,7 @@
 ALethalItem::ALethalItem()
 {
 	StaticMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(FName("StaticMeshComponent"));
-
-	SetRootComponent(StaticMeshComponent);
+	StaticMeshComponent->SetupAttachment(GetRootComponent());
 }
 
 void ALethalItem::BeginPlay()
@@ -37,4 +36,18 @@ void ALethalItem::BeginPlay()
 	{
 		UE_LOG(LogTemp, Warning, TEXT("No rows in table, set it up, dumbass."));
 	}
+}
+
+void ALethalItem::ToggleCollision(bool Collision)
+{
+	if (Collision)
+	{
+		StaticMeshComponent->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	}
+	else
+	{
+		StaticMeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	}
+
+	StaticMeshComponent->SetSimulatePhysics(Collision);
 }

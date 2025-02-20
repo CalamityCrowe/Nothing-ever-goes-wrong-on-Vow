@@ -14,6 +14,23 @@ ALethalPlayer::ALethalPlayer() :ALethalCharacters()
 	CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComponent"));
 	CameraComponent->SetupAttachment(GetRootComponent());
 	CameraComponent->bUsePawnControlRotation = true;
+
+	ItemHolderComponent = CreateDefaultSubobject<USceneComponent>(TEXT("ItemHolderComponent"));
+	ItemHolderComponent->SetupAttachment(GetRootComponent());
+}
+
+void ALethalPlayer::PickupItem(TObjectPtr<ALethalItem> ItemToPickup)
+{
+	ItemToPickup->ToggleCollision(false);
+
+	ItemToPickup->AttachToActor(this, FAttachmentTransformRules::KeepRelativeTransform);
+}
+
+void ALethalPlayer::DropItem(TObjectPtr<ALethalItem> ItemToDrop)
+{
+	ItemToDrop->ToggleCollision(true);
+
+
 }
 
 void ALethalPlayer::BeginPlay()
