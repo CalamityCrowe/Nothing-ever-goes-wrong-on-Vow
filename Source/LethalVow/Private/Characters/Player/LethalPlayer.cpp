@@ -23,14 +23,14 @@ void ALethalPlayer::PickupItem(TObjectPtr<ALethalItem> ItemToPickup)
 {
 	ItemToPickup->ToggleCollision(false);
 
-	ItemToPickup->AttachToActor(this, FAttachmentTransformRules::KeepRelativeTransform);
+	ItemToPickup->AttachToActor(this, FAttachmentTransformRules::KeepRelativeTransform, FName("ItemHold_Socket"));
 }
 
 void ALethalPlayer::DropItem(TObjectPtr<ALethalItem> ItemToDrop)
 {
 	ItemToDrop->ToggleCollision(true);
 
-
+	ItemToDrop->DetachFromActor(FDetachmentTransformRules::KeepRelativeTransform);
 }
 
 void ALethalPlayer::BeginPlay()
