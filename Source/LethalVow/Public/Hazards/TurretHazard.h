@@ -9,9 +9,40 @@
 /**
  * 
  */
+
+class USpotLightComponent;
+class ALethalPlayer;
 UCLASS()
 class LETHALVOW_API ATurretHazard : public ALethalHazard
 {
 	GENERATED_BODY()
 	
+public:
+	ATurretHazard();
+
+protected:
+	virtual void BeginPlay() override;
+
+private:
+	UFUNCTION()
+	void LineTraceMethod();
+
+	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly, Category = "Light", meta = (AllowPrivateAccess = true))
+	TObjectPtr<USpotLightComponent> TurretLightComponent;
+	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly,Category = "Mesh", meta = (AllowPrivateAccess = true))
+	TObjectPtr<UStaticMeshComponent> SpotLightCollision;
+
+	FTimerHandle TimerHandle;
+	float TurnRate;
+
+protected:
+	UFUNCTION()
+	void BeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+	UFUNCTION()
+	void EndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+private:
+	
+	void RotateTurret();
+	ALethalPlayer* PlayerRef;
+
 };
