@@ -22,7 +22,7 @@ ALethalPlayer::ALethalPlayer() :ALethalCharacters()
 
 void ALethalPlayer::AttemptPickupItem()
 {
-	if (!HeldItem.IsNull())
+	if (HeldItem)
 	{
 		return;
 	}
@@ -48,11 +48,12 @@ void ALethalPlayer::AttemptPickupItem()
 	{
 		TObjectPtr<ALethalItem> ItemHit = Cast<ALethalItem>(Hit.GetActor());
 
-		if (ItemHit && HeldItem.IsNull() && FVector::Dist(CharacterLocation, ItemHit->GetActorLocation()) <= ItemGrabRange)
+		if (ItemHit && !HeldItem && FVector::Dist(CharacterLocation, ItemHit->GetActorLocation()) <= ItemGrabRange)
 		{
 			ItemHit->ToggleCollision(false);
 
-			ItemHit->AttachToActor(this, FAttachmentTransformRules::KeepRelativeTransform, ItemHoldSocketName);
+			ItemHit->SetActorLocation(GetMesh()->GetSocketLocation(ItemHoldSocketName));
+			ItemHit->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform, ItemHoldSocketName);
 
 			if (ItemHit->GetAttachParentSocketName() == ItemHoldSocketName)
 			{
@@ -74,7 +75,7 @@ void ALethalPlayer::DropItem(TObjectPtr<ALethalItem> ItemToDrop)
 {
 	ItemToDrop->ToggleCollision(true);
 
-	ItemToDrop->DetachFromActor(FDetachmentTransformRules::KeepRelativeTransform);
+	ItemToDrop->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
 
 	if (ItemToDrop->GetAttachParentSocketName() != ItemHoldSocketName)
 	{
