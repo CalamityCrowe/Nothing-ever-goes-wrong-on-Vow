@@ -25,7 +25,7 @@ protected:
 
 private:
 	UFUNCTION()
-	void LineTraceMethod();
+	FHitResult SearchForPlayer();
 
 	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly, Category = "Light", meta = (AllowPrivateAccess = true))
 	TObjectPtr<USpotLightComponent> TurretLightComponent;
@@ -44,5 +44,8 @@ private:
 	
 	void RotateTurret();
 	ALethalPlayer* PlayerRef;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Distance", meta = (AllowPrivateAccess = true))
+	float TraceDistance;
 
 };

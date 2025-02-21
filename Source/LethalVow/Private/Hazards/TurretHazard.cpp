@@ -15,6 +15,8 @@ ATurretHazard::ATurretHazard()
 	SpotLightCollision->SetupAttachment(TurretLightComponent);
 
 	SpotLightCollision->OnComponentBeginOverlap.AddDynamic(this, &ATurretHazard::BeginOverlap);
+
+	TraceDistance = 1000.0f;
 }
 
 void ATurretHazard::BeginPlay()
@@ -22,9 +24,17 @@ void ATurretHazard::BeginPlay()
 	Super::BeginPlay(); 
 }
 
-void ATurretHazard::LineTraceMethod()
+FHitResult ATurretHazard::SearchForPlayer()
 {
+	FVector StartPos = GetActorLocation();
+	FVector EndPos = StartPos + (GetActorForwardVector() * TraceDistance);
 
+	FHitResult Hit;
+	FCollisionQueryParams QueryParams;
+
+	QueryParams.AddIgnoredActor(this);
+	GetWorld()->LineTraceSingleByChannel(Hit, StartPos, EndPos, ECC_Visibility, QueryParams);
+	return Hit;
 }
 
 void ATurretHazard::BeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
@@ -54,7 +64,7 @@ void ATurretHazard::EndOverlap(UPrimitiveComponent* OverlappedComponent, AActor*
 
 void ATurretHazard::RotateTurret()
 {
-	if (PlayerRef)
+	if (SearchForPlayer().GetActor() == PlayerRef)
 	{
 		FRotator LookAtRotation = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), PlayerRef->GetActorLocation());
 		FRotator CurrentRotation = FMath::RInterpTo(GetActorRotation(), LookAtRotation, GetWorld()->GetDeltaSeconds(), TurnRate);
