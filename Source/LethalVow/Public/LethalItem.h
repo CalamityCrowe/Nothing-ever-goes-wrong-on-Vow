@@ -25,7 +25,10 @@ public:
 	float ItemScale = 1.0f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	int32 ItemCost = 0.0f;
+	int32 ItemCost = 0;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (ClampMin = "0", ClampMax = "100"))
+	int32 ItemRarity = 0;
 };
 
 UCLASS()
@@ -38,11 +41,15 @@ public:
 
 	virtual void BeginPlay() override;
 
-	void ToggleCollision(bool Collision);
-private:
-	FName ItemName;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (ClampMin = "0", ClampMax = "100"))
+	int32 ChanceToSpawn = 100;
 
-	FName ItemDescription;
+	void ToggleCollision(bool Collision);
+
+	UFUNCTION(BlueprintCallable)
+	const FLethalItemConfig& GetItemConfig() { return *ItemConfig; }
+private:
+	FLethalItemConfig* ItemConfig;
 
 	TObjectPtr<UStaticMeshComponent> StaticMeshComponent;
 
