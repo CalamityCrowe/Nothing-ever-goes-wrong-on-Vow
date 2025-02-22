@@ -24,13 +24,23 @@ protected:
 	virtual void BeginPlay() override;
 
 private:
-	UFUNCTION()
-	FHitResult SearchForPlayer();
+	//UFUNCTION()
+	//FHitResult& SearchForPlayer();
 
 	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly, Category = "Light", meta = (AllowPrivateAccess = true))
 	TObjectPtr<USpotLightComponent> TurretLightComponent;
 	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly,Category = "Mesh", meta = (AllowPrivateAccess = true))
 	TObjectPtr<UStaticMeshComponent> SpotLightCollision;
+
+	UPROPERTY(EditDefaultsOnly,BLueprintReadOnly,Category = "Light",meta = (AllowPrivateAccess = true))
+	FColor ActiveLightColor;
+	UPROPERTY(EditDefaultsOnly, BLueprintReadOnly, Category = "Light", meta = (AllowPrivateAccess = true))
+	FColor SeekingLightColor;
+	UPROPERTY(EditDefaultsOnly, BLueprintReadOnly, Category = "Light", meta = (AllowPrivateAccess = true))
+	FColor AttackLightColor;
+
+	
+ 
 
 	FTimerHandle TimerHandle;
 	float TurnRate;
@@ -47,5 +57,7 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Distance", meta = (AllowPrivateAccess = true))
 	float TraceDistance;
+
+
 
 };
