@@ -32,32 +32,36 @@ private:
 	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly,Category = "Mesh", meta = (AllowPrivateAccess = true))
 	TObjectPtr<UStaticMeshComponent> SpotLightCollision;
 
-	UPROPERTY(EditDefaultsOnly,BLueprintReadOnly,Category = "Light",meta = (AllowPrivateAccess = true))
+	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly,Category = "Light",meta = (AllowPrivateAccess = true))
 	FColor ActiveLightColor;
-	UPROPERTY(EditDefaultsOnly, BLueprintReadOnly, Category = "Light", meta = (AllowPrivateAccess = true))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Light", meta = (AllowPrivateAccess = true))
 	FColor SeekingLightColor;
-	UPROPERTY(EditDefaultsOnly, BLueprintReadOnly, Category = "Light", meta = (AllowPrivateAccess = true))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Light", meta = (AllowPrivateAccess = true))
 	FColor AttackLightColor;
 
-	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Rotatation", meta = (AllowPrivateAccess = true))
+	FRotator MaxRotation;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Rotatation", meta = (AllowPrivateAccess = true))
+	FRotator MinRotation;
  
 
-	FTimerHandle TimerHandle;
+	FTimerHandle RotateHandle;
+	FTimerHandle ToggleHandle;
+
+	void FlipRotation(); 
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Rotatation", meta = (AllowPrivateAccess = true))
 	float TurnRate;
 
-protected:
-	UFUNCTION()
-	void BeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
-	UFUNCTION()
-	void EndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
-private:
-	
 	void RotateTurret();
-	ALethalPlayer* PlayerRef;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Distance", meta = (AllowPrivateAccess = true))
 	float TraceDistance;
 
+	bool bRotateClockwise;
+
+private:
+	
 
 
 };
