@@ -23,6 +23,9 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	float ItemScale = 1.0f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	int32 Cost = 0.0f;
 };
 
 UCLASS()
