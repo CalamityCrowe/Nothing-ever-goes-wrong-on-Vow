@@ -66,22 +66,25 @@ void ATurretHazard::RotateTurret()
 	}
 	else
 	{
-		FRotator CurrentRotation = GetActorRotation();
-		if (bRotateClockwise && CurrentRotation.Yaw <= MaxRotation.Yaw)
+		FRotator CurrentRotation = GetMesh()->GetComponentRotation(); //it works better
+		if (GetWorld()->GetTimerManager().IsTimerActive(ToggleHandle) == false)
 		{
-			CurrentRotation = GetMesh()->GetComponentRotation() + FRotator(0, GetWorld()->GetDeltaSeconds() * TurnRate, 0);
 
-		}
-		else
-		{
-			CurrentRotation = GetMesh()->GetComponentRotation() - FRotator(0, GetWorld()->GetDeltaSeconds() * TurnRate, 0);
-
-			//bRotateClockwise = true;
+			if (bRotateClockwise)
+			{
+				CurrentRotation.Yaw = FMath::Clamp(CurrentRotation.Yaw +(GetWorld()->GetDeltaSeconds() * TurnRate), MinRotation.Yaw, MaxRotation.Yaw);
+			}
+			else
+			{
+				CurrentRotation.Yaw = FMath::Clamp(CurrentRotation.Yaw - (GetWorld()->GetDeltaSeconds() * TurnRate), MinRotation.Yaw, MaxRotation.Yaw);
+				//bRotateClockwise = true;
+			}
 		}
 		if (((CurrentRotation.Yaw <= MinRotation.Yaw) || (CurrentRotation.Yaw >= MaxRotation.Yaw)) && (GetWorld()->GetTimerManager().IsTimerActive(ToggleHandle) == false))
 		{
 			GetWorld()->GetTimerManager().SetTimer(ToggleHandle, this, &ATurretHazard::FlipRotation, 3.0f, false);
 		}
+		GEngine->AddOnScreenDebugMessage(-1, 0.1f, FColor::Red, FString::Printf(TEXT("Current Rotation: %f"), CurrentRotation.Yaw));
 		GetMesh()->SetWorldRotation(CurrentRotation);
 		TurretLightComponent->SetWorldRotation(GetMesh()->GetComponentRotation());
 	}
