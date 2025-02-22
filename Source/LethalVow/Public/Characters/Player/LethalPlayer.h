@@ -18,7 +18,6 @@ class LETHALVOW_API ALethalPlayer : public ALethalCharacters
 	GENERATED_BODY()
 	
 public:
-
 	ALethalPlayer();
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
@@ -34,7 +33,6 @@ protected:
 	virtual void BeginPlay() override;
 
 public:
-
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	virtual void DamageHealth(float DamageAmount) override;
@@ -51,16 +49,22 @@ private:
 
 	TObjectPtr<USceneComponent> ItemHolderComponent;
 
+	FTimerHandle SearchForItemTimerHandle;
+
 	UFUNCTION()
 	void MovePlayer(const FInputActionValue& Value); 
 
 	UFUNCTION()
 	void Look(const FInputActionValue& Value);
 
+	UFUNCTION()
+	void SearchForItem();
+
 	void AttemptPickupItem();
 
 	void DropItem(TObjectPtr<ALethalItem> ItemToDrop);
 
+	TObjectPtr<ALethalItem> ItemLookingAt;
 	TObjectPtr<ALethalItem> HeldItem;
 
 	void ToggleDebug();
