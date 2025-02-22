@@ -20,7 +20,7 @@ ALethalPlayer::ALethalPlayer() :ALethalCharacters()
 	ItemHolderComponent->SetupAttachment(GetRootComponent());
 }
 
-void ALethalPlayer::AttemptPickupItem()
+void ALethalPlayer::SearchForItem()
 {
 	if (HeldItem)
 	{
@@ -50,15 +50,7 @@ void ALethalPlayer::AttemptPickupItem()
 
 		if (ItemHit && !HeldItem && FVector::Dist(CharacterLocation, ItemHit->GetActorLocation()) <= ItemGrabRange)
 		{
-			ItemHit->ToggleCollision(false);
-
-			ItemHit->SetActorLocation(GetMesh()->GetSocketLocation(ItemHoldSocketName));
-			ItemHit->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform, ItemHoldSocketName);
-
-			if (ItemHit->GetAttachParentSocketName() == ItemHoldSocketName)
-			{
-				HeldItem = ItemHit;
-			}
+			ItemLookingAt = ItemHit;
 		}
 	}
 
@@ -69,6 +61,22 @@ void ALethalPlayer::AttemptPickupItem()
 		DrawDebugSphere(GetWorld(), CharacterLocation, ItemGrabRange, 32, FColor(255, 0, 0, 128), false, 1.0f);
 	}
 #endif
+}
+
+void ALethalPlayer::AttemptPickupItem()
+{
+	if (HeldItem || !ItemLookingAt)
+	{
+		return;
+	}
+
+	HeldItem = ItemLookingAt;
+	ItemLookingAt = nullptr;
+
+	HeldItem->ToggleCollision(false);
+
+	HeldItem->SetActorLocation(GetMesh()->GetSocketLocation(ItemHoldSocketName));
+	HeldItem->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform, ItemHoldSocketName);
 }
 
 void ALethalPlayer::DropItem(TObjectPtr<ALethalItem> ItemToDrop)
@@ -93,6 +101,8 @@ void ALethalPlayer::ToggleDebug()
 void ALethalPlayer::BeginPlay()
 {
 	ALethalCharacters::BeginPlay();
+
+	GetWorldTimerManager().SetTimer(SearchForItemTimerHandle, this, &ALethalPlayer::SearchForItem, 0.1f, true);
 }
 
 void ALethalPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
