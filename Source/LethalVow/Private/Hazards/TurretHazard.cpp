@@ -21,31 +21,24 @@ ATurretHazard::ATurretHazard()
 
 void ATurretHazard::BeginPlay()
 {
-	Super::BeginPlay(); 
+	Super::BeginPlay();
 }
 
-FHitResult ATurretHazard::SearchForPlayer()
-{
-	FVector StartPos = GetActorLocation();
-	FVector EndPos = StartPos + (GetActorForwardVector() * TraceDistance);
-
-	FHitResult Hit;
-	FCollisionQueryParams QueryParams;
-
-	QueryParams.AddIgnoredActor(this);
-	GetWorld()->LineTraceSingleByChannel(Hit, StartPos, EndPos, ECC_Visibility, QueryParams);
-	return Hit;
-}
+//FHitResult& ATurretHazard::SearchForPlayer()
+//{
+//
+//
+//}
 
 void ATurretHazard::BeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	UE_LOG(LogTemp, Warning, TEXT("BeginOverlap"));
-	if(ALethalPlayer* TempPlayer = Cast<ALethalPlayer>(OtherActor))
+	if (ALethalPlayer* TempPlayer = Cast<ALethalPlayer>(OtherActor))
 	{
 		if (TempPlayer->IsAlive())
 		{
 			PlayerRef = TempPlayer;
-			GetWorldTimerManager().SetTimer(TimerHandle, this, &ATurretHazard::RotateTurret,0.1f, true);
+			GetWorldTimerManager().SetTimer(TimerHandle, this, &ATurretHazard::RotateTurret, 0.01f, true);
 		}
 	}
 }
@@ -64,10 +57,26 @@ void ATurretHazard::EndOverlap(UPrimitiveComponent* OverlappedComponent, AActor*
 
 void ATurretHazard::RotateTurret()
 {
-	if (SearchForPlayer().GetActor() == PlayerRef)
+
+	FVector StartPos = GetActorLocation();
+	FVector EndPos = StartPos + (GetMesh()->GetForwardVector() * TraceDistance);
+
+	FHitResult Hit;
+	FCollisionQueryParams QueryParams;
+
+	QueryParams.AddIgnoredActor(this);
+	GetWorld()->LineTraceSingleByChannel(Hit, StartPos, EndPos, ECC_Pawn, QueryParams);
+
+#if UE_EDITOR
+	DrawDebugLine(GetWorld(), StartPos, EndPos, FColor::Red, false, 0.1f, 0, 1.0f);
+#endif
+
+	if (Hit.GetActor() == PlayerRef)
 	{
 		FRotator LookAtRotation = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), PlayerRef->GetActorLocation());
 		FRotator CurrentRotation = FMath::RInterpTo(GetActorRotation(), LookAtRotation, GetWorld()->GetDeltaSeconds(), TurnRate);
 		GetMesh()->SetWorldRotation(CurrentRotation);
+
+		//TurretLightComponent
 	}
 }
