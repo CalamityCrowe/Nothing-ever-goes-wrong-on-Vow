@@ -12,29 +12,67 @@ ALethalItem::ALethalItem()
 
 void ALethalItem::BeginPlay()
 {
-	TArray<FName> RowNames = ItemsDataTable->GetRowNames();
-
-	if (RowNames.Num() > 0)
+	if (FMath::RandRange(0, 100) <= ChanceToSpawn)
 	{
-		FName RandomRowName = RowNames[FMath::RandRange(0, RowNames.Num() - 1)];
-		FLethalItemConfig* ItemConfig = ItemsDataTable->FindRow<FLethalItemConfig>(RandomRowName, TEXT(""));
+		TArray<FName> RowNames = ItemsDataTable->GetRowNames();
 
-		if (ItemConfig)
+		if (RowNames.Num() > 0)
 		{
-			ItemName = ItemConfig->ItemName;
-			ItemDescription = ItemConfig->ItemDescription;
-			StaticMeshComponent->SetStaticMesh(ItemConfig->ItemMesh);
-			
-			SetActorScale3D(FVector(ItemConfig->ItemScale, ItemConfig->ItemScale, ItemConfig->ItemScale));
+			int32 TotalWeight = 0;
+			TArray<int32> Weights;
+
+			for (const FName& RowName : RowNames)
+			{
+				FLethalItemConfig* Config = ItemsDataTable->FindRow<FLethalItemConfig>(RowName, TEXT(""));
+
+				if (Config)
+				{
+					int32 Weight = 100 - Config->ItemRarity;
+					TotalWeight += Weight;
+					Weights.Add(Weight);
+				}
+				else
+				{
+					Weights.Add(0);
+				}
+			}
+
+			int32 RandomWeight = FMath::RandRange(0, TotalWeight - 1);
+			int32 SelectedIndex = 0;
+
+			for (int32 i = 0; i < Weights.Num(); i++)
+			{
+				RandomWeight -= Weights[i];
+
+				if (RandomWeight < 0)
+				{
+					SelectedIndex = i;
+					break;
+				}
+			}
+
+			FName RandomRowName = RowNames[SelectedIndex];
+			ItemConfig = ItemsDataTable->FindRow<FLethalItemConfig>(RandomRowName, TEXT(""));
+
+			if (ItemConfig)
+			{
+				StaticMeshComponent->SetStaticMesh(ItemConfig->ItemMesh);
+
+				SetActorScale3D(FVector(ItemConfig->ItemScale, ItemConfig->ItemScale, ItemConfig->ItemScale));
+			}
+			else
+			{
+				UE_LOG(LogTemp, Warning, TEXT("Failed to find row: %s in DataTable: %s"), *RandomRowName.ToString(), *ItemsDataTable->GetName());
+			}
 		}
 		else
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Failed to find row: %s in DataTable: %s"), *RandomRowName.ToString(), *ItemsDataTable->GetName());
+			UE_LOG(LogTemp, Warning, TEXT("No rows in table, set it up, dumbass."));
 		}
 	}
 	else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("No rows in table, set it up, dumbass."));
+		ConditionalBeginDestroy();
 	}
 }
 

@@ -52,6 +52,14 @@ void ALethalPlayer::SearchForItem()
 		{
 			ItemLookingAt = ItemHit;
 		}
+		else
+		{
+			ItemLookingAt = nullptr;
+		}
+	}
+	else
+	{
+		ItemLookingAt = nullptr;
 	}
 
 #if UE_EDITOR
@@ -79,16 +87,25 @@ void ALethalPlayer::AttemptPickupItem()
 	HeldItem->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform, ItemHoldSocketName);
 }
 
-void ALethalPlayer::DropItem(TObjectPtr<ALethalItem> ItemToDrop)
+void ALethalPlayer::DropItem()
 {
-	ItemToDrop->ToggleCollision(true);
+	if (!HeldItem)
+	{
+		return;
+	}
 
-	ItemToDrop->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+	HeldItem->ToggleCollision(true);
 
-	if (ItemToDrop->GetAttachParentSocketName() != ItemHoldSocketName)
+	HeldItem->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+
+	if (HeldItem->GetAttachParentSocketName() != ItemHoldSocketName)
 	{
 		HeldItem = nullptr;
 	}
+	
+	GetWorldTimerManager().ClearTimer(SearchForItemTimerHandle);
+
+	GetWorldTimerManager().SetTimer(SearchForItemTimerHandle, this, &ALethalPlayer::SearchForItem, 0.1f, true, 1.0f);
 }
 
 void ALethalPlayer::ToggleDebug()
@@ -134,6 +151,7 @@ void ALethalPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 
 		PEI->BindAction(InputData->InteractActions[0], ETriggerEvent::Triggered, this, &ALethalPlayer::AttemptPickupItem);
 		PEI->BindAction(InputData->InteractActions[1], ETriggerEvent::Triggered, this, &ALethalPlayer::ToggleDebug);
+		PEI->BindAction(InputData->InteractActions[2], ETriggerEvent::Triggered, this, &ALethalPlayer::DropItem);
 	}
 }
 

@@ -29,16 +29,18 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	float CharacterHeight;
 
-protected:
-	virtual void BeginPlay() override;
-
-public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	virtual void DamageHealth(float DamageAmount) override;
 
 	UPROPERTY(BlueprintAssignable)
 	FOnPlayerHealthUpdated OnPlayerHealthUpdated;
+
+	TObjectPtr<ALethalItem> GetHeldItem() { return HeldItem; }
+
+	void ResetHeldItem() { HeldItem = nullptr; };
+protected:
+	virtual void BeginPlay() override;
 
 private:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Camera", meta = (AllowPrivateAccess = true))
@@ -62,9 +64,11 @@ private:
 
 	void AttemptPickupItem();
 
-	void DropItem(TObjectPtr<ALethalItem> ItemToDrop);
+	void DropItem();
 
+	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = true))
 	TObjectPtr<ALethalItem> ItemLookingAt;
+
 	TObjectPtr<ALethalItem> HeldItem;
 
 	void ToggleDebug();
