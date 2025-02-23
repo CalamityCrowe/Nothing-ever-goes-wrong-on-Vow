@@ -15,9 +15,7 @@ void ALethalGameState::DepositItem(TObjectPtr<ALethalItem> ItemToDeposit)
 		return;
 	}
 
-	const FLethalItemConfig ItemConfig = ItemToDeposit->GetItemConfig();
-
-	TotalScore += ItemConfig.ItemCost;
+	TotalScore += ItemToDeposit->GetItemCost();
 
 	ItemToDeposit->ConditionalBeginDestroy();
 }

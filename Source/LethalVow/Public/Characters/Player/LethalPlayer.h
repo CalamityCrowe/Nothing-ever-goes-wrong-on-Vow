@@ -9,6 +9,7 @@
 
 class UCameraComponent;
 class UInputData;
+class ULethalInventory;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPlayerHealthUpdated, float, Health);
 
@@ -36,9 +37,9 @@ public:
 	UPROPERTY(BlueprintAssignable)
 	FOnPlayerHealthUpdated OnPlayerHealthUpdated;
 
-	TObjectPtr<ALethalItem> GetHeldItem() { return HeldItem; }
+	TObjectPtr<ALethalItem> GetHeldItem();
 
-	void ResetHeldItem() { HeldItem = nullptr; };
+	void ResetHeldItem();
 protected:
 	virtual void BeginPlay() override;
 
@@ -51,6 +52,9 @@ private:
 
 	TObjectPtr<USceneComponent> ItemHolderComponent;
 
+	UPROPERTY(EditDefaultsOnly, BLueprintReadOnly, meta = (AllowPrivateAccess = true))
+	TObjectPtr<ULethalInventory> InventoryComponent;
+
 	FTimerHandle SearchForItemTimerHandle;
 
 	UFUNCTION()
@@ -62,14 +66,14 @@ private:
 	UFUNCTION()
 	void SearchForItem();
 
+	void ShiftInventorySlot(const FInputActionValue& Value);
+
 	void AttemptPickupItem();
 
 	void DropItem();
 
 	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = true))
 	TObjectPtr<ALethalItem> ItemLookingAt;
-
-	TObjectPtr<ALethalItem> HeldItem;
 
 	void ToggleDebug();
 

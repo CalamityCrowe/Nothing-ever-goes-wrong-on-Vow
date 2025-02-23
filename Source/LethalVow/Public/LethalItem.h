@@ -25,7 +25,10 @@ public:
 	float ItemScale = 1.0f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	int32 ItemCost = 0;
+	int32 MinItemCost = 0;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	int32 MaxItemCost = 0;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (ClampMin = "0", ClampMax = "100"))
 	int32 ItemRarity = 0;
@@ -47,9 +50,14 @@ public:
 	void ToggleCollision(bool Collision);
 
 	UFUNCTION(BlueprintCallable)
+	const int32 GetItemCost() { return ItemCost; };
+
+	UFUNCTION(BlueprintCallable)
 	const FLethalItemConfig& GetItemConfig() { return *ItemConfig; }
 private:
 	FLethalItemConfig* ItemConfig;
+
+	int32 ItemCost = 0;
 
 	TObjectPtr<UStaticMeshComponent> StaticMeshComponent;
 

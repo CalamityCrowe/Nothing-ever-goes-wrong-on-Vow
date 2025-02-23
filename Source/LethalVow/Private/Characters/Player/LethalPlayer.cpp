@@ -4,7 +4,7 @@
 #include "Characters/Player/LethalPlayer.h"
 #include "Camera/CameraComponent.h"
 #include "Components/LivingStats.h"
-
+#include "Items/LethalInventory.h"
 #include "DataAssets/InputData.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
@@ -18,11 +18,18 @@ ALethalPlayer::ALethalPlayer() :ALethalCharacters()
 
 	ItemHolderComponent = CreateDefaultSubobject<USceneComponent>(TEXT("ItemHolderComponent"));
 	ItemHolderComponent->SetupAttachment(GetRootComponent());
+
+	InventoryComponent = CreateDefaultSubobject<ULethalInventory>(TEXT("InventoryComponent"));
 }
 
 void ALethalPlayer::SearchForItem()
 {
-	if (HeldItem)
+	if (!InventoryComponent)
+	{
+		return;
+	}
+
+	if (InventoryComponent->IsItemInCurrentSlot())
 	{
 		return;
 	}
@@ -48,7 +55,7 @@ void ALethalPlayer::SearchForItem()
 	{
 		TObjectPtr<ALethalItem> ItemHit = Cast<ALethalItem>(Hit.GetActor());
 
-		if (ItemHit && !HeldItem && FVector::Dist(CharacterLocation, ItemHit->GetActorLocation()) <= ItemGrabRange)
+		if (ItemHit && FVector::Dist(CharacterLocation, ItemHit->GetActorLocation()) <= ItemGrabRange)
 		{
 			ItemLookingAt = ItemHit;
 		}
@@ -71,41 +78,73 @@ void ALethalPlayer::SearchForItem()
 #endif
 }
 
+void ALethalPlayer::ShiftInventorySlot(const FInputActionValue& Value)
+{
+	float ScrollValue = Value.Get<float>();
+
+	if (InventoryComponent)
+	{
+		InventoryComponent->ShiftSlot(ScrollValue);
+	}
+}
+
 void ALethalPlayer::AttemptPickupItem()
 {
-	if (HeldItem || !ItemLookingAt)
+	if (!InventoryComponent)
 	{
 		return;
 	}
 
-	HeldItem = ItemLookingAt;
-	ItemLookingAt = nullptr;
+	if (InventoryComponent->IsItemInCurrentSlot() || !ItemLookingAt)
+	{
+		return;
+	}
 
-	HeldItem->ToggleCollision(false);
+	if (InventoryComponent->AttemptPickupItem(ItemLookingAt))
+	{
+		TObjectPtr<ALethalItem> CurrentSlotItem = InventoryComponent->GetItemInCurrentSlot();
 
-	HeldItem->SetActorLocation(GetMesh()->GetSocketLocation(ItemHoldSocketName));
-	HeldItem->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform, ItemHoldSocketName);
+		if (CurrentSlotItem)
+		{
+			ItemLookingAt = nullptr;
+
+			CurrentSlotItem->ToggleCollision(false);
+
+			CurrentSlotItem->SetActorLocation(GetMesh()->GetSocketLocation(ItemHoldSocketName));
+			CurrentSlotItem->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform, ItemHoldSocketName);
+		}
+	}
 }
 
 void ALethalPlayer::DropItem()
 {
-	if (!HeldItem)
+	if (!InventoryComponent)
 	{
 		return;
 	}
 
-	HeldItem->ToggleCollision(true);
-
-	HeldItem->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
-
-	if (HeldItem->GetAttachParentSocketName() != ItemHoldSocketName)
+	if (!InventoryComponent->IsItemInCurrentSlot())
 	{
-		HeldItem = nullptr;
+		return;
 	}
-	
-	GetWorldTimerManager().ClearTimer(SearchForItemTimerHandle);
 
-	GetWorldTimerManager().SetTimer(SearchForItemTimerHandle, this, &ALethalPlayer::SearchForItem, 0.1f, true, 1.0f);
+	TObjectPtr<ALethalItem> CurrentSlotItem = InventoryComponent->GetItemInCurrentSlot();
+
+	if (CurrentSlotItem)
+	{
+		CurrentSlotItem->ToggleCollision(true);
+
+		CurrentSlotItem->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+
+		if (CurrentSlotItem->GetAttachParentSocketName() != ItemHoldSocketName)
+		{
+			InventoryComponent->DropItem();
+		}
+
+		GetWorldTimerManager().ClearTimer(SearchForItemTimerHandle);
+
+		GetWorldTimerManager().SetTimer(SearchForItemTimerHandle, this, &ALethalPlayer::SearchForItem, 0.1f, true, 1.0f);
+	}
 }
 
 void ALethalPlayer::ToggleDebug()
@@ -113,6 +152,41 @@ void ALethalPlayer::ToggleDebug()
 #if UE_EDITOR
 	bDebug = !bDebug;
 #endif
+}
+
+TObjectPtr<ALethalItem> ALethalPlayer::GetHeldItem()
+{
+	if (!InventoryComponent)
+	{
+		return nullptr;
+	}
+
+	if (!InventoryComponent->IsItemInCurrentSlot())
+	{
+		return nullptr;
+	}
+
+	return InventoryComponent->GetItemInCurrentSlot();
+}
+
+void ALethalPlayer::ResetHeldItem()
+{
+	if (!InventoryComponent)
+	{
+		return;
+	}
+
+	if (!InventoryComponent->IsItemInCurrentSlot())
+	{
+		return;
+	}
+
+	TObjectPtr<ALethalItem> CurrentSlotItem = InventoryComponent->GetItemInCurrentSlot();
+
+	if (CurrentSlotItem)
+	{
+		InventoryComponent->DropItem();
+	}
 }
 
 void ALethalPlayer::BeginPlay()
@@ -152,6 +226,7 @@ void ALethalPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 		PEI->BindAction(InputData->InteractActions[0], ETriggerEvent::Triggered, this, &ALethalPlayer::AttemptPickupItem);
 		PEI->BindAction(InputData->InteractActions[1], ETriggerEvent::Triggered, this, &ALethalPlayer::ToggleDebug);
 		PEI->BindAction(InputData->InteractActions[2], ETriggerEvent::Triggered, this, &ALethalPlayer::DropItem);
+		PEI->BindAction(InputData->InteractActions[3], ETriggerEvent::Triggered, this, &ALethalPlayer::ShiftInventorySlot);
 	}
 }
 
