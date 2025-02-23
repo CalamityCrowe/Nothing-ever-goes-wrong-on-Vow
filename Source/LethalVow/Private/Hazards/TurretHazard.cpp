@@ -3,18 +3,19 @@
 
 #include "Hazards/TurretHazard.h"
 #include "Components/SpotLightComponent.h"
+#include "Components/CapsuleComponent.h"
 #include "Characters/Player/LethalPlayer.h"
 #include <Kismet/KismetMathLibrary.h>
 
 ATurretHazard::ATurretHazard()
 {
+	PrimaryActorTick.bCanEverTick = true;
+
+	TurretMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("TurretMesh"));
+	RootComponent = TurretMesh;
+	
 	TurretLightComponent = CreateDefaultSubobject<USpotLightComponent>(TEXT("TurretLightComponent"));
-	TurretLightComponent->SetupAttachment(GetMesh());
-
-	SpotLightCollision = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("SpotLightCollision"));
-	SpotLightCollision->SetupAttachment(TurretLightComponent);
-
-
+	
 
 	TraceDistance = 1000.0f;
 }
@@ -22,8 +23,11 @@ ATurretHazard::ATurretHazard()
 void ATurretHazard::BeginPlay()
 {
 	Super::BeginPlay();
+	TurretLightComponent->AttachToComponent(TurretMesh, FAttachmentTransformRules::KeepWorldTransform,FName());
 
-	GetWorld()->GetTimerManager().SetTimer(RotateHandle, this, &ATurretHazard::RotateTurret, 0.1f, true);
+	CurrentRotation = TurretMesh->GetSocketRotation(SocketName);
+	UE_LOG(LogTemp, Warning, TEXT("Yaw at Begin: %f"), CurrentRotation.Yaw);
+	GetWorld()->GetTimerManager().SetTimer(RotateHandle, this, &ATurretHazard::RotateTurret, 0.05f, true);
 }
 
 //FHitResult& ATurretHazard::SearchForPlayer()
@@ -44,7 +48,7 @@ void ATurretHazard::RotateTurret()
 {
 
 	FVector StartPos = GetActorLocation();
-	FVector EndPos = StartPos + (GetMesh()->GetForwardVector() * TraceDistance);
+	FVector EndPos = StartPos + (TurretLightComponent->GetForwardVector() * TraceDistance);
 
 	FHitResult Hit;
 	FCollisionQueryParams QueryParams;
@@ -57,22 +61,23 @@ void ATurretHazard::RotateTurret()
 #endif
 	if (Cast<ALethalPlayer>(Hit.GetActor()))
 	{
+
 		FRotator LookAtRotation = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), Hit.GetActor()->GetActorLocation());
-		FRotator CurrentRotation = FMath::RInterpTo(GetActorRotation(), LookAtRotation, GetWorld()->GetDeltaSeconds(), TurnRate);
-		GetMesh()->SetWorldRotation(CurrentRotation);
-		TurretLightComponent->SetWorldRotation(GetMesh()->GetComponentRotation());
-		TurretLightComponent->SetLightColor(AttackLightColor);
+		CurrentRotation = FMath::RInterpTo(GetActorRotation(), LookAtRotation, GetWorld()->GetDeltaSeconds(), TurnRate);
+		TurretMesh->GetSocketTransform(SocketName).SetRotation(CurrentRotation.Quaternion());
+		//TurretLightComponent->SetWorldRotation(GetMesh()->GetComponentRotation());
+		//TurretLightComponent->SetLightColor(AttackLightColor);
 		//TurretLightComponent
 	}
 	else
 	{
-		FRotator CurrentRotation = GetMesh()->GetComponentRotation(); //it works better
+		UE_LOG(LogTemp, Warning, TEXT("Yaw at Handle: %f"), CurrentRotation.Yaw);
 		if (GetWorld()->GetTimerManager().IsTimerActive(ToggleHandle) == false)
 		{
 
 			if (bRotateClockwise)
 			{
-				CurrentRotation.Yaw = FMath::Clamp(CurrentRotation.Yaw +(GetWorld()->GetDeltaSeconds() * TurnRate), MinRotation.Yaw, MaxRotation.Yaw);
+				CurrentRotation.Yaw = FMath::Clamp(CurrentRotation.Yaw + (GetWorld()->GetDeltaSeconds() * TurnRate), MinRotation.Yaw, MaxRotation.Yaw);
 			}
 			else
 			{
@@ -85,7 +90,7 @@ void ATurretHazard::RotateTurret()
 			GetWorld()->GetTimerManager().SetTimer(ToggleHandle, this, &ATurretHazard::FlipRotation, 3.0f, false);
 		}
 		GEngine->AddOnScreenDebugMessage(-1, 0.1f, FColor::Red, FString::Printf(TEXT("Current Rotation: %f"), CurrentRotation.Yaw));
-		GetMesh()->SetWorldRotation(CurrentRotation);
-		TurretLightComponent->SetWorldRotation(GetMesh()->GetComponentRotation());
+		TurretMesh->GetSocketTransform(SocketName).SetRotation(CurrentRotation.Quaternion());
+		//TurretLightComponent->SetWorldRotation(GetMesh()->GetComponentRotation());
 	}
 }

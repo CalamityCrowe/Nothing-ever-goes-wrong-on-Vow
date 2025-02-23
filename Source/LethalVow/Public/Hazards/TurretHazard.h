@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Hazards/LethalHazard.h"
+#include "GameFramework/Actor.h"
 #include "TurretHazard.generated.h"
 
 /**
@@ -13,13 +13,15 @@
 class USpotLightComponent;
 class ALethalPlayer;
 UCLASS()
-class LETHALVOW_API ATurretHazard : public ALethalHazard
+class LETHALVOW_API ATurretHazard : public AActor
 {
 	GENERATED_BODY()
 	
 public:
 	ATurretHazard();
-
+	
+	UFUNCTION(BlueprintPure)
+	FRotator GetCurrentRotation() const { return CurrentRotation; }
 protected:
 	virtual void BeginPlay() override;
 
@@ -27,10 +29,15 @@ private:
 	//UFUNCTION()
 	//FHitResult& SearchForPlayer();
 
+
+
 	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly, Category = "Light", meta = (AllowPrivateAccess = true))
 	TObjectPtr<USpotLightComponent> TurretLightComponent;
 	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly,Category = "Mesh", meta = (AllowPrivateAccess = true))
-	TObjectPtr<UStaticMeshComponent> SpotLightCollision;
+	TObjectPtr<USkeletalMeshComponent> TurretMesh;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly,Category = "Mesh|Attach Socket",meta = (AllowPrivateAccess = true))
+	FName SocketName;
 
 	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly,Category = "Light",meta = (AllowPrivateAccess = true))
 	FColor ActiveLightColor;
@@ -62,6 +69,7 @@ private:
 
 private:
 	
+	FRotator CurrentRotation; //it works better
 
 
 };
