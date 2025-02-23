@@ -14,7 +14,7 @@ ATurretHazard::ATurretHazard()
 	SpotLightCollision = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("SpotLightCollision"));
 	SpotLightCollision->SetupAttachment(TurretLightComponent);
 
-	SpotLightCollision->OnComponentBeginOverlap.AddDynamic(this, &ATurretHazard::BeginOverlap);
+
 
 	TraceDistance = 1000.0f;
 }
@@ -22,6 +22,8 @@ ATurretHazard::ATurretHazard()
 void ATurretHazard::BeginPlay()
 {
 	Super::BeginPlay();
+
+	GetWorld()->GetTimerManager().SetTimer(RotateHandle, this, &ATurretHazard::RotateTurret, 0.1f, true);
 }
 
 //FHitResult& ATurretHazard::SearchForPlayer()
@@ -30,29 +32,12 @@ void ATurretHazard::BeginPlay()
 //
 //}
 
-void ATurretHazard::BeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
-{
-	UE_LOG(LogTemp, Warning, TEXT("BeginOverlap"));
-	if (ALethalPlayer* TempPlayer = Cast<ALethalPlayer>(OtherActor))
-	{
-		if (TempPlayer->IsAlive())
-		{
-			PlayerRef = TempPlayer;
-			GetWorldTimerManager().SetTimer(TimerHandle, this, &ATurretHazard::RotateTurret, 0.01f, true);
-		}
-	}
-}
 
-void ATurretHazard::EndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+
+void ATurretHazard::FlipRotation()
 {
-	if (ALethalPlayer* TempPlayer = Cast<ALethalPlayer>(OtherActor))
-	{
-		if (TempPlayer == PlayerRef)
-		{
-			PlayerRef = nullptr;
-			GetWorldTimerManager().ClearTimer(TimerHandle);
-		}
-	}
+	bRotateClockwise = !bRotateClockwise;
+	GetWorld()->GetTimerManager().ClearTimer(ToggleHandle);
 }
 
 void ATurretHazard::RotateTurret()
@@ -70,13 +55,37 @@ void ATurretHazard::RotateTurret()
 #if UE_EDITOR
 	DrawDebugLine(GetWorld(), StartPos, EndPos, FColor::Red, false, 0.1f, 0, 1.0f);
 #endif
-
-	if (Hit.GetActor() == PlayerRef)
+	if (Cast<ALethalPlayer>(Hit.GetActor()))
 	{
-		FRotator LookAtRotation = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), PlayerRef->GetActorLocation());
+		FRotator LookAtRotation = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), Hit.GetActor()->GetActorLocation());
 		FRotator CurrentRotation = FMath::RInterpTo(GetActorRotation(), LookAtRotation, GetWorld()->GetDeltaSeconds(), TurnRate);
 		GetMesh()->SetWorldRotation(CurrentRotation);
-
+		TurretLightComponent->SetWorldRotation(GetMesh()->GetComponentRotation());
+		TurretLightComponent->SetLightColor(AttackLightColor);
 		//TurretLightComponent
+	}
+	else
+	{
+		FRotator CurrentRotation = GetMesh()->GetComponentRotation(); //it works better
+		if (GetWorld()->GetTimerManager().IsTimerActive(ToggleHandle) == false)
+		{
+
+			if (bRotateClockwise)
+			{
+				CurrentRotation.Yaw = FMath::Clamp(CurrentRotation.Yaw +(GetWorld()->GetDeltaSeconds() * TurnRate), MinRotation.Yaw, MaxRotation.Yaw);
+			}
+			else
+			{
+				CurrentRotation.Yaw = FMath::Clamp(CurrentRotation.Yaw - (GetWorld()->GetDeltaSeconds() * TurnRate), MinRotation.Yaw, MaxRotation.Yaw);
+				//bRotateClockwise = true;
+			}
+		}
+		if (((CurrentRotation.Yaw <= MinRotation.Yaw) || (CurrentRotation.Yaw >= MaxRotation.Yaw)) && (GetWorld()->GetTimerManager().IsTimerActive(ToggleHandle) == false))
+		{
+			GetWorld()->GetTimerManager().SetTimer(ToggleHandle, this, &ATurretHazard::FlipRotation, 3.0f, false);
+		}
+		GEngine->AddOnScreenDebugMessage(-1, 0.1f, FColor::Red, FString::Printf(TEXT("Current Rotation: %f"), CurrentRotation.Yaw));
+		GetMesh()->SetWorldRotation(CurrentRotation);
+		TurretLightComponent->SetWorldRotation(GetMesh()->GetComponentRotation());
 	}
 }
