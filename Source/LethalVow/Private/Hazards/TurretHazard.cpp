@@ -65,9 +65,6 @@ void ATurretHazard::RotateTurret()
 		FRotator LookAtRotation = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), Hit.GetActor()->GetActorLocation());
 		CurrentRotation = FMath::RInterpTo(GetActorRotation(), LookAtRotation, GetWorld()->GetDeltaSeconds(), TurnRate);
 		TurretMesh->GetSocketTransform(SocketName).SetRotation(CurrentRotation.Quaternion());
-		//TurretLightComponent->SetWorldRotation(GetMesh()->GetComponentRotation());
-		//TurretLightComponent->SetLightColor(AttackLightColor);
-		//TurretLightComponent
 	}
 	else
 	{
@@ -82,7 +79,6 @@ void ATurretHazard::RotateTurret()
 			else
 			{
 				CurrentRotation.Yaw = FMath::Clamp(CurrentRotation.Yaw - (GetWorld()->GetDeltaSeconds() * TurnRate), MinRotation.Yaw, MaxRotation.Yaw);
-				//bRotateClockwise = true;
 			}
 		}
 		if (((CurrentRotation.Yaw <= MinRotation.Yaw) || (CurrentRotation.Yaw >= MaxRotation.Yaw)) && (GetWorld()->GetTimerManager().IsTimerActive(ToggleHandle) == false))
@@ -91,6 +87,5 @@ void ATurretHazard::RotateTurret()
 		}
 		GEngine->AddOnScreenDebugMessage(-1, 0.1f, FColor::Red, FString::Printf(TEXT("Current Rotation: %f"), CurrentRotation.Yaw));
 		TurretMesh->GetSocketTransform(SocketName).SetRotation(CurrentRotation.Quaternion());
-		//TurretLightComponent->SetWorldRotation(GetMesh()->GetComponentRotation());
 	}
 }
