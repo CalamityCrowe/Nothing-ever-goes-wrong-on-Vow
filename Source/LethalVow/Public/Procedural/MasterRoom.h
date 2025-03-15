@@ -7,6 +7,7 @@
 #include "MasterRoom.generated.h"
 
 class UBoxComponent;
+class AExitWall;
 
 UCLASS()
 class LETHALVOW_API AMasterRoom : public AActor
@@ -31,6 +32,7 @@ public:
 
 	TObjectPtr<USceneComponent> GetMeshFolder() const { return MeshFolder; }
 
+
 protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Components")
@@ -44,4 +46,6 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly, Category = "Components|Mesh")
 	TObjectPtr<UStaticMeshComponent> FloorMesh;
+
+
 };

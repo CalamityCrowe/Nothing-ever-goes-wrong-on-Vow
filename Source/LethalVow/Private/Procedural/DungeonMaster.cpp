@@ -4,6 +4,7 @@
 #include "Procedural/DungeonMaster.h"
 #include "Procedural/MasterRoom.h"
 #include "Components/BoxComponent.h"
+#include "Procedural/EndWall.h"
 // Sets default values
 ADungeonMaster::ADungeonMaster()
 {
@@ -108,8 +109,7 @@ void ADungeonMaster::CloseHoles()
 {
 	for (USceneComponent* Exit : Exits) 
 	{
-		// this needs a class to spawn the end wall
-		//GetWorld()->SpawnActor<AEndWall>(PossibleRooms, Exit->GetComponentTransform());
+		GetWorld()->SpawnActor<AEndWall>(EndWallRef, Exit->GetComponentTransform());
 	}
 
 }

@@ -3,6 +3,7 @@
 
 #include "Procedural/MasterRoom.h"
 #include "Components/BoxComponent.h"
+#include"Procedural/EndWall.h"
 // Sets default values
 AMasterRoom::AMasterRoom()
 {
@@ -15,14 +16,14 @@ AMasterRoom::AMasterRoom()
 	OverlapFolder = CreateDefaultSubobject<USceneComponent>(TEXT("Overlap Folder"));
 	OverlapFolder->SetupAttachment(GetRootComponent());
 
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	OverlapBox = CreateDefaultSubobject<UBoxComponent>(TEXT("OverlapBox"));
 	OverlapBox->SetCollisionProfileName("RoomOverlap");
-	OverlapBox->SetupAttachment(OverlapFolder); 
+	OverlapBox->SetupAttachment(OverlapFolder);
 
 	FloorMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("FloorMesh"));
 	FloorMesh->SetupAttachment(MeshFolder);
-	
+
 
 }
 
@@ -30,7 +31,7 @@ AMasterRoom::AMasterRoom()
 void AMasterRoom::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
 }
 
 // Called every frame
@@ -39,4 +40,6 @@ void AMasterRoom::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 }
+
+
 

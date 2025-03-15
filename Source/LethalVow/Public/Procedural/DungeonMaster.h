@@ -7,7 +7,7 @@
 #include "DungeonMaster.generated.h"
 
 class AMasterRoom;
-
+class AEndWall; 
 UCLASS()
 class LETHALVOW_API ADungeonMaster : public AActor
 {
@@ -35,12 +35,16 @@ private:
 	int RoomAmount;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Rooms", meta = (AllowPrivateAccess = true))
 	TSubclassOf<AMasterRoom> StartRoom;
+	UPROPERTY(EditDefaultsOnly, Category = "Rooms", meta = (AllowPrivateAccess = true))
+	TSubclassOf<AEndWall> EndWallRef;
 
 	TArray<UPrimitiveComponent*> OverlappedList;
 	TObjectPtr<AMasterRoom> LatestRoom;
 
 
 	USceneComponent* SelectedExit;
+
+
 
 #pragma endregion
 
