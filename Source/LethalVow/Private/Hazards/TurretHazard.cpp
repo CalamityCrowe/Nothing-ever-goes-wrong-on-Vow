@@ -54,6 +54,7 @@ void ATurretHazard::RotateTurret()
 	{
 		ResetTimer = 0.0f;
 		TrackedTarget = Cast<ALethalPlayer>(Hit.GetActor());
+		TurretLightComponent->SetLightColor(AttackLightColor);
 		if (GetWorld()->GetTimerManager().IsTimerActive(TrackingHandle) == false)
 		{
 			GetWorld()->GetTimerManager().SetTimer(TrackingHandle, this, &ATurretHazard::MoveToTarget, GetWorld()->GetDeltaSeconds(), true);
@@ -64,6 +65,7 @@ void ATurretHazard::RotateTurret()
 		UE_LOG(LogTemp, Warning, TEXT("Reset Timer %f"), ResetTimer);
 		if (GetWorld()->GetTimerManager().IsTimerActive(TrackingHandle))
 		{
+			TurretLightComponent->SetLightColor(SeekingLightColor);
 			if(!Cast<ALethalPlayer>(Hit.GetActor()))
 			{
 				ResetTimer += GetWorld()->GetDeltaSeconds() * ResetTarget;
