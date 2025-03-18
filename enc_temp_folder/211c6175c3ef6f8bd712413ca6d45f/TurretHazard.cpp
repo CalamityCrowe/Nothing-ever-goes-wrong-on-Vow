@@ -52,23 +52,21 @@ void ATurretHazard::RotateTurret()
 
 	if (Cast<ALethalPlayer>(Hit.GetActor()))
 	{
-		ResetTimer = 0.0f;
 		TrackedTarget = Cast<ALethalPlayer>(Hit.GetActor());
-		if (GetWorld()->GetTimerManager().IsTimerActive(TrackingHandle) == false)
-		{
-			GetWorld()->GetTimerManager().SetTimer(TrackingHandle, this, &ATurretHazard::MoveToTarget, GetWorld()->GetDeltaSeconds(), true);
-		}
+		GetWorld()->GetTimerManager().SetTimer(TrackingHandle, this, &ATurretHazard::MoveToTarget, 0.0f, true);
 	}
 	else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Reset Timer %f"), ResetTimer);
 		if (GetWorld()->GetTimerManager().IsTimerActive(TrackingHandle))
 		{
+			UE_LOG(LogTemp, Warning, TEXT("Tracking"));
 			if(!Cast<ALethalPlayer>(Hit.GetActor()))
 			{
-				ResetTimer += GetWorld()->GetDeltaSeconds() * ResetTarget;
-				if (ResetTimer >= (ResetTarget/ResetTarget))
+				UE_LOG(LogTemp, Warning, TEXT("Lost Target"));
+				ResetTimer += GetWorld()->GetDeltaSeconds();
+				if (ResetTimer >= ResetTarget)
 				{
+					UE_LOG(LogTemp, Warning, TEXT("Reset Target"));
 					TrackedTarget = nullptr;
 					ResetTimer = 0.0f;
 					GetWorld()->GetTimerManager().ClearTimer(TrackingHandle);
@@ -97,14 +95,15 @@ void ATurretHazard::RotateTurret()
 			}
 		}
 	}
+
+
 }
 
 void ATurretHazard::MoveToTarget()
 {
 	FRotator TargetRotation = UKismetMathLibrary::FindLookAtRotation(TurretMesh->GetSocketLocation(SocketName), TrackedTarget->GetActorLocation());
 	
-	FRotator NewRotation = FMath::RInterpTo(CurrentRotation, TargetRotation, GetWorld()->GetDeltaSeconds(), 1.5f);
-	NewRotation.Yaw = FMath::UnwindDegrees(NewRotation.Yaw);
+	FRotator NewRotation = FMath::RInterpTo(TurretMesh->GetSocketRotation(SocketName), TargetRotation, GetWorld()->GetDeltaSeconds(), 5.0f);
 	CurrentRotation.Yaw = FMath::Clamp(NewRotation.Yaw, MinRotation.Yaw, MaxRotation.Yaw);
 
 }

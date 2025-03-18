@@ -54,6 +54,13 @@ private:
 
 	FTimerHandle RotateHandle;
 	FTimerHandle ToggleHandle;
+	FTimerHandle TrackingHandle;
+
+	float ResetTimer;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Timer", meta = (AllowPrivateAccess = true))
+	float ResetTarget;
+
+	TObjectPtr<ALethalPlayer> TrackedTarget;
 
 	void FlipRotation(); 
 
@@ -71,5 +78,6 @@ private:
 	
 	FRotator CurrentRotation; //it works better
 
+	void MoveToTarget();
 
 };
