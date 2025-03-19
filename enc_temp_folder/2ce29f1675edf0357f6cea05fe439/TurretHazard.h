@@ -24,8 +24,6 @@ public:
 	
 	UFUNCTION(BlueprintPure)
 	FRotator GetCurrentRotation() const { return CurrentRotation; }
-	UFUNCTION(BlueprintPure)
-	float GetBarrelRotation() const { return CurrentBarrelRotation; }
 protected:
 	virtual void BeginPlay() override;
 
@@ -56,25 +54,16 @@ private:
 #pragma region Rotation
 	bool bRotateClockwise;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Rotation", meta = (AllowPrivateAccess = true))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Rotatation", meta = (AllowPrivateAccess = true))
 	FRotator MaxRotation;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Rotation", meta = (AllowPrivateAccess = true))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Rotatation", meta = (AllowPrivateAccess = true))
 	FRotator MinRotation;
-
-
-
 	void FlipRotation();
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Rotation", meta = (AllowPrivateAccess = true))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Rotatation", meta = (AllowPrivateAccess = true))
 	float TurnRate;
 
-	float CurrentBarrelRotation;
-
 	void RotateTurret();
-
-	FRotator CurrentRotation; //it works better
-
-
 #pragma endregion
 #pragma region Timers & tracking
 	FTimerHandle RotateHandle;
@@ -90,6 +79,9 @@ private:
 	float TraceDistance;
 #pragma endregion
 
+private:
+	
+	FRotator CurrentRotation; //it works better
 
 	void MoveToTarget();
 

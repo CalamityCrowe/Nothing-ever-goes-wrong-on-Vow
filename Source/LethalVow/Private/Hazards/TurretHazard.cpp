@@ -2,9 +2,11 @@
 
 
 #include "Hazards/TurretHazard.h"
+
+#include "Characters/Player/LethalPlayer.h"
 #include "Components/SpotLightComponent.h"
 #include "Components/CapsuleComponent.h"
-#include "Characters/Player/LethalPlayer.h"
+#include "Components/AC_ObjectPool.h"
 #include <Kismet/KismetMathLibrary.h>
 
 ATurretHazard::ATurretHazard()
@@ -16,6 +18,8 @@ ATurretHazard::ATurretHazard()
 
 	TurretLightComponent = CreateDefaultSubobject<USpotLightComponent>(TEXT("TurretLightComponent"));
 	TurretLightComponent->SetupAttachment(TurretMesh);
+
+	ProjectilePool = CreateDefaultSubobject<UAC_ObjectPool>(TEXT("ProjectilePool"));
 
 	TraceDistance = 1000.0f;
 }
